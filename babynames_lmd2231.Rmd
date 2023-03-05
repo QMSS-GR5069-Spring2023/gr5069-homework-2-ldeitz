@@ -1,0 +1,85 @@
+---
+title: "babynames_lmd2231"
+author: "Lauren Deitz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+library(babynames)
+library(ggplot2)    # the king of plotting 
+library(magrittr)   # chain operators, e.g. to "pipe" a value forward
+library(dplyr)      # for data manipulation 
+```
+
+### Plot the most common names in 2017 over the entire period.
+
+```{r}
+names2017 <- babynames %>%
+  filter(year==2017) %>%
+  group_by(name) %>%
+  summarize(total = sum(n)) %>%
+  arrange(desc(total)) %>%
+  mutate(rank=row_number()) %>%
+  filter(rank<=10)
+
+babynames %>%
+  filter(name %in% names2017$name) %>%
+  group_by(year,name) %>%
+  mutate(count=sum(n)) %>%
+  ggplot(.,aes(x=year, y=count, color=name, group=name)) +
+  geom_line()
+```
+
+### Which names are most often used as unisex names? For which has the popularity changed a lot?
+
+```{r}
+# get all female names and counts
+allfemalenames <- babynames %>%
+  filter(sex=="F") %>%
+  group_by(name) %>%
+  summarize(count=sum(n))
+
+#get all male names and counts
+allmalenames <- babynames %>%
+  filter(sex=="M") %>%
+  group_by(name) %>%
+  summarize(count=sum(n))
+
+#merge together on name
+allnamesmerge <- merge(allfemalenames, allmalenames, by="name")
+
+allnamesmerge <- allnamesmerge %>%
+  mutate(diff=count.x - count.y) %>% # take count difference
+  mutate(sum=count.x + count.y) %>% # get total count
+  mutate(unisex = sum-abs(diff)) %>% # calculate unisex total
+  arrange(desc(unisex)) %>% # sort by unisex totals descending
+  mutate(rank=row_number()) # rank
+
+top15unisex = filter(allnamesmerge, rank<=15)
+
+babynames %>%
+  filter(name %in% top15unisex$name) %>%
+  group_by(year, name) %>%
+  mutate(count=sum(n)) %>%
+  ggplot(.,aes(x=year, y=count, group=name, color=name)) +
+  geom_line()
+```
+
+### Identify one particular pattern in the data.
+
+Around 1990, it looks like "place" names -- naming a child after a city or location -- started to become more popular.
+
+```{r}
+babynames %>%
+  filter(name=="Brooklyn" | name=="Madison" | name=="Savannah" | name=="Austin") %>%
+  group_by(year, name) %>%
+  mutate(total=sum(n)) %>%
+  ggplot(.,aes(x=year, y=total, group=name, color=name)) +
+  geom_line()
+```
+
