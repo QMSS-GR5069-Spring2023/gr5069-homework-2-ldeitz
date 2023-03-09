@@ -1,5 +1,5 @@
 ---
-title: "babynames compiled markdown document"
+title: "babynames_lmd2231"
 author: "Lauren Deitz"
 output: html_document
 ---
@@ -19,6 +19,7 @@ library(dplyr)      # for data manipulation
 ### Plot the most common names in 2017 over the entire period.
 
 ```{r}
+# filtering and processing data related to baby names in 2017
 names2017 <- babynames %>%
   filter(year==2017) %>%
   group_by(name) %>%
@@ -27,6 +28,8 @@ names2017 <- babynames %>%
   mutate(rank=row_number()) %>%
   filter(rank<=10)
 
+
+# creating a line plot for the count of babynames over time, based on the 2017 most-freq names
 babynames %>%
   filter(name %in% names2017$name) %>%
   group_by(year,name) %>%
@@ -75,6 +78,7 @@ babynames %>%
 Around 1990, it looks like "place" names -- naming a child after a city or location -- started to become more popular.
 
 ```{r}
+# get babyname freq for "city names" - e.g. Brooklyn, Madison, etc.
 babynames %>%
   filter(name=="Brooklyn" | name=="Madison" | name=="Savannah" | name=="Austin") %>%
   group_by(year, name) %>%
@@ -82,4 +86,3 @@ babynames %>%
   ggplot(.,aes(x=year, y=total, group=name, color=name)) +
   geom_line()
 ```
-
