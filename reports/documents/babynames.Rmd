@@ -1,5 +1,5 @@
 ---
-title: "babynames_lmd2231"
+title: "babynames compiled markdown document"
 author: "Lauren Deitz"
 output: html_document
 ---
